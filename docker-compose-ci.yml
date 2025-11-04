@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  backend:
+    image: esharaza171/mywebapp-backend:latest
+    container_name: ci_backend
+    restart: unless-stopped
+    ports:
+      - "4001:4000"            # different port than Part-I
+    environment:
+      - PORT=4000
+      - MONGO_URI=${MONGO_URI}
+    volumes:
+      - ./backend:/app          # mount code instead of building
+      - ./backend/uploads:/app/uploads
+      - ./backend/.env:/app/.env
+
+  frontend:
+    image: esharaza171/mywebapp-frontend:latest
+    container_name: ci_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8083:80"              # different port than Part-I
+    volumes:
+      - ./frontend:/usr/share/nginx/html  # mount code for Jenkins
+
+  admin:
+    image: esharaza171/mywebapp-admin:latest
+    container_name: ci_admin
+    restart: unless-stopped
+    ports:
+      - "8084:80"              # different port than Part-I
+    volumes:
+      - ./admin:/usr/share/nginx/html     # mount code for Jenkins
