@@ -10,4 +10,5 @@ Currently, two official plugins are available:
 # Test Jenkins pipeline trigger
 # hello
 # hellooo
+# hi
 
