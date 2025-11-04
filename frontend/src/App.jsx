@@ -14,7 +14,7 @@ import AllPets from "./components/AllPets";
 import "./index.css";
 import Hom from "./components/Hom";
 import { useState } from "react";
-import Loginpopup from "./components/Loginpopup";
+import Loginpopup from "./components/loginpopup";
 import AdoptionPopup from "./components/AdoptionPopup";
 
 const App = () => {

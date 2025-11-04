@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pet_backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - JWT_SECRET=your_secret_key
+      - MONGO_URI=${MONGO_URI}
+    volumes:
+      - ./backend/uploads:/app/uploads  # keep uploaded images
+      - ./backend/.env:/app/.env        # use your local .env file
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pet_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: pet_admin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+
+# Named volume not needed since MongoDB is Atlas-hosted

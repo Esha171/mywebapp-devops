@@ -1,4 +1,4 @@
-import "./loginpopup.css";
+import "./Loginpopup.css";
 import { useState } from "react";
 
 
