@@ -8,27 +8,40 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Pull latest code from GitHub using your personal access token
                 git branch: 'main', url: 'https://github.com/Esha171/mywebapp-devops.git', credentialsId: 'github-pat'
             }
         }
 
-        stage('Build & Deploy') {
+        stage('Build & Deploy Frontend') {
             steps {
                 script {
-                    // Stop and remove existing containers safely
-                    sh "docker compose -f ${COMPOSE_FILE} down --remove-orphans"
-                    
-                    // Deploy containers in detached mode
+                    echo "🛑 Removing old frontend container if it exists"
+                    sh "docker rm -f ci_frontend || true"  // ignore error if container doesn't exist
+
+                    echo "📦 Building new frontend image"
+                    sh "docker build -t my-frontend-fixed ./frontend"
+
+                    echo "🚀 Running new frontend container"
+                    sh "docker run -d -p 8083:80 --name ci_frontend my-frontend-fixed"
+
+                    echo "🔍 Verifying frontend files inside container"
+                    sh "docker exec ci_frontend ls /usr/share/nginx/html"
+                }
+            }
+        }
+
+        stage('Deploy Backend & Other Services') {
+            steps {
+                script {
+                    echo "🛠 Bringing up backend/services via docker-compose"
                     sh "docker compose -f ${COMPOSE_FILE} up -d --build"
                 }
             }
         }
 
-        stage('Verify') {
+        stage('Verify Deployment') {
             steps {
                 script {
-                    // List all running containers to verify deployment
                     sh "docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}'"
                 }
             }
