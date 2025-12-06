@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Paws and Claws Test Suite" verbose="1">
+    <test name="Pet Adoption Web App Tests">
+        <classes>
+            <class name="com.pawsandclaws.tests.HomePageTests"/>
+            <class name="com.pawsandclaws.tests.NavigationTests"/>
+            <class name="com.pawsandclaws.tests.LoginPopupTests"/>
+            <class name="com.pawsandclaws.tests.AdoptPetsTests"/>
+            <class name="com.pawsandclaws.tests.CartTests"/>
+            <class name="com.pawsandclaws.tests.PetSuppliesTests"/>
+        </classes>
+    </test>
+</suite>
