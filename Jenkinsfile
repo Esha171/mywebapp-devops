@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -24,28 +23,12 @@ pipeline {
             }
         }
 
-        stage('Build & Deploy Frontend') {
+        stage('Deploy Backend & All Services') {
             steps {
                 script {
-                    echo "🛑 Removing old frontend container if it exists"
-                    sh "docker rm -f ci_frontend || true"
-
-                    echo "📦 Building new frontend image"
-                    sh "docker build -t my-frontend-fixed ./frontend"
-
-                    echo "🚀 Running new frontend container"
-                    sh "docker run -d -p 8083:80 --name ci_frontend my-frontend-fixed"
-
-                    echo "🔍 Verifying frontend files inside container"
-                    sh "docker exec ci_frontend ls /usr/share/nginx/html"
-                }
-            }
-        }
-
-        stage('Deploy Backend & Other Services') {
-            steps {
-                script {
-                    echo "🛠 Deploying backend/services using docker-compose"
+                    echo "🛠 Bringing down old containers (if any)"
+                    sh "docker compose -f ${COMPOSE_FILE} down || true"
+                    echo "🛠 Building and deploying everything with docker-compose"
                     sh "docker compose -f ${COMPOSE_FILE} up -d --build"
                 }
             }
