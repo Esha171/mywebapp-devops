@@ -23,9 +23,22 @@ pipeline {
         stage('Clean & Free Space') {
             steps {
                 script {
-                    echo "🧹 Cleaning Docker system to free space"
-                    sh "docker system prune -af || true"
+                    echo "🧹 Aggressive cleanup to free disk space"
+                    // Stop and remove all unused containers
+                    sh "docker container prune -f || true"
+                    // Remove all unused images (not just dangling)
+                    sh "docker image prune -af || true"
+                    // Remove all unused volumes
                     sh "docker volume prune -f || true"
+                    // Remove all unused networks
+                    sh "docker network prune -f || true"
+                    // Full system prune
+                    sh "docker system prune -af --volumes || true"
+                    // Clean up old build cache
+                    sh "docker builder prune -af || true"
+                    // Show disk usage
+                    sh "df -h || true"
+                    sh "docker system df || true"
                 }
             }
         }
@@ -64,12 +77,20 @@ pipeline {
                 script {
                     echo "🧪 Running Selenium automated tests in Docker container..."
                     
+                    // Clean up unused images before pulling test image
+                    echo "🧹 Pre-test cleanup to ensure space for test image..."
+                    sh "docker image prune -f || true"
+                    
                     // Get the host IP for the container to access the deployed app
                     def hostIP = sh(script: "hostname -I | awk '{print \$1}'", returnStdout: true).trim()
                     echo "🌐 Host IP: ${hostIP}"
                     
+                    // Pull the image first to see if there's space
+                    echo "📥 Pulling Selenium test image..."
+                    sh "docker pull markhobson/maven-chrome:3.8.6-jdk-11-slim || docker pull markhobson/maven-chrome"
+                    
                     // Run Selenium tests using markhobson/maven-chrome Docker image
-                    // Using 'latest' tag and port 8083 (frontend nginx port from docker-compose)
+                    // Using port 8083 (frontend nginx port from docker-compose)
                     sh """
                         docker run --rm \
                             --network host \
