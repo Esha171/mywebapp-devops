@@ -33,7 +33,7 @@ public class AdoptPetsTests {
     
     /**
      * TC007: Verify Adopt Pets Page Loads and Filter Works
-     * Verifies that the Adopt Pets page loads with filter dropdown functionality.
+     * Verifies that the Adopt Pets page load s with filter dropdown functionality.
      */
     @Test(priority = 1, description = "TC007: Verify Adopt Pets page loads with filter dropdown")
     public void testAdoptPetsPageLoadsWithFilter() {
