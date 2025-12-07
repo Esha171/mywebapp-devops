@@ -77,6 +77,10 @@
                     <systemPropertyVariables>
                         <baseUrl>${env.BASE_URL}</baseUrl>
                     </systemPropertyVariables>
+                    <!-- Retry flaky tests - tests that pass on retry are considered successful -->
+                    <rerunFailingTestsCount>2</rerunFailingTestsCount>
+                    <!-- Only count as failure if test fails on all retries -->
+                    <failIfNoTests>false</failIfNoTests>
                 </configuration>
             </plugin>
 

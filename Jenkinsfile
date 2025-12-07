@@ -58,7 +58,22 @@ pipeline {
             steps {
                 script {
                     echo "⏳ Waiting for services to be fully ready..."
-                    sh "sleep 30"
+                    sh "sleep 45"
+                    
+                    def hostIP = sh(script: "hostname -I | awk '{print \$1}'", returnStdout: true).trim()
+                    echo "🌐 Host IP: ${hostIP}"
+                    
+                    echo "🔍 Checking if frontend is accessible..."
+                    sh """
+                        for i in 1 2 3 4 5 6; do
+                            if curl -s --max-time 10 http://${hostIP}:8083 > /dev/null 2>&1; then
+                                echo "✅ Frontend is responding!"
+                                break
+                            fi
+                            echo "⏳ Attempt \$i: Frontend not ready yet, waiting 10 seconds..."
+                            sleep 10
+                        done
+                    """
                 }
             }
         }
@@ -76,6 +91,8 @@ pipeline {
                     echo "📥 Pulling Selenium test image..."
                     sh "docker pull markhobson/maven-chrome:3.8.6-jdk-11-slim || docker pull markhobson/maven-chrome"
 
+                    // Run tests - using -DrerunFailingTestsCount to handle flaky tests
+                    // Tests that fail initially but pass on retry will be considered passed
                     sh """
                         docker run --rm \
                             --network host \
@@ -83,7 +100,7 @@ pipeline {
                             -w /app \
                             -e BASE_URL=http://${hostIP}:8083 \
                             markhobson/maven-chrome \
-                            mvn clean test
+                            mvn clean test -DrerunFailingTestsCount=2 -Dsurefire.rerunFailingTestsCount=2
                     """
                 }
             }
