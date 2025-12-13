@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         COMPOSE_FILE = "docker-compose-ci.yml"
-        GIT_COMMITTER_EMAIL = ""
         FALLBACK_EMAIL = "admin@example.com"
     }
 
@@ -17,16 +16,17 @@ pipeline {
                     credentialsId: 'github-pat'
 
                 script {
-                    GIT_COMMITTER_EMAIL = sh(
+                    // Store in environment variable properly
+                    env.GIT_COMMITTER_EMAIL = sh(
                         script: "git log -1 --pretty=format:'%ae'",
                         returnStdout: true
                     ).trim()
 
-                    echo "📧 Committer Email: ${GIT_COMMITTER_EMAIL}"
+                    echo "📧 Committer Email: ${env.GIT_COMMITTER_EMAIL}"
 
-                    if (!GIT_COMMITTER_EMAIL) {
+                    if (!env.GIT_COMMITTER_EMAIL || env.GIT_COMMITTER_EMAIL == '') {
                         echo "⚠️ Committer email not found, using fallback"
-                        GIT_COMMITTER_EMAIL = FALLBACK_EMAIL
+                        env.GIT_COMMITTER_EMAIL = FALLBACK_EMAIL
                     }
                 }
             }
@@ -150,7 +150,7 @@ pipeline {
     post {
 
         always {
-            echo "📧 Build triggered by: ${GIT_COMMITTER_EMAIL}"
+            echo "📧 Build triggered by: ${env.GIT_COMMITTER_EMAIL}"
         }
 
         success {
@@ -158,7 +158,7 @@ pipeline {
                 emailext(
                     subject: "✅ SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                     mimeType: 'text/html',
-                    to: "${GIT_COMMITTER_EMAIL}",
+                    to: "${env.GIT_COMMITTER_EMAIL}",
                     attachLog: true,
                     body: """
                         <html>
@@ -167,6 +167,7 @@ pipeline {
                             <p><b>Job:</b> ${env.JOB_NAME}</p>
                             <p><b>Build:</b> #${env.BUILD_NUMBER}</p>
                             <p><b>URL:</b> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+                            <p><b>Triggered by:</b> ${env.GIT_COMMITTER_EMAIL}</p>
                             <p>All tests passed successfully 🎉</p>
                         </body>
                         </html>
@@ -180,7 +181,7 @@ pipeline {
                 emailext(
                     subject: "❌ FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                     mimeType: 'text/html',
-                    to: "${GIT_COMMITTER_EMAIL}",
+                    to: "${env.GIT_COMMITTER_EMAIL}",
                     attachLog: true,
                     body: """
                         <html>
@@ -189,6 +190,7 @@ pipeline {
                             <p><b>Job:</b> ${env.JOB_NAME}</p>
                             <p><b>Build:</b> #${env.BUILD_NUMBER}</p>
                             <p><b>URL:</b> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+                            <p><b>Triggered by:</b> ${env.GIT_COMMITTER_EMAIL}</p>
                             <p>Please check console output for details.</p>
                         </body>
                         </html>
