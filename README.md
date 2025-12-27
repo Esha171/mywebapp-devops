@@ -157,7 +157,7 @@ cd mywebapp-devops
 cd backend
 npm install
 
-# Create .env file from template
+# Create .env file from template (run from backend directory)
 cp .env.template .env
 # Edit .env and add your MongoDB URI and JWT secret
 ```
@@ -218,7 +218,7 @@ npm run dev
 ```bash
 cd admin
 npm run dev
-# Admin runs on http://localhost:5174
+# Admin runs on http://localhost:5173 (or next available port)
 ```
 
 ### Option 2: Docker Compose (Recommended)
